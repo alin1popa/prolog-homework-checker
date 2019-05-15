@@ -23,12 +23,11 @@ def generate_output(swipl, tema, testin):
 	
 	# build goal
 	checkingScript = '\
-		from(From),\
-		to(To),\
-		input(Graph),\
-		formula(Formula),\
-		getPath(From, To, Graph, Formula, Path),\
-		write(Path), halt\
+		retea(R),\
+        from(F),\
+        to(T),\
+		stp(R,Root,Edges),\
+		write(Root), write(:), write(Edges), halt\
 	';
 	
 	# final prolog script
@@ -56,7 +55,7 @@ if __name__ == '__main__':
 	tema = sys.argv[1]
 	testin = sys.argv[2]
 
-	output = generate_output(swipl, tema, testin)
+	output = generate_output(swipl_win, tema, testin)
 
 	with open('output.txt', 'w') as f:
 		f.write(output)
