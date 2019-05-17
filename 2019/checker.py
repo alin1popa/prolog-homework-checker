@@ -102,8 +102,8 @@ def run_test(swipl, hwfile, testfile, reffile, suppress_errors = False):
    
  
 def run_all(swipl, hwfile):
-    score_per_easy_test = EASY_TESTS_SCORE / NO_EASY_TESTS
-    score_per_hard_test = HARD_TESTS_SCORE / NO_HARD_TESTS
+    score_per_easy_test = EASY_TESTS_SCORE / NO_EASY_TESTS if NO_EASY_TESTS != 0 else 0
+    score_per_hard_test = HARD_TESTS_SCORE / NO_HARD_TESTS if NO_HARD_TESTS != 0 else 0
     
     print("Type #no\tresult%\tpoints\ttotal")
     
@@ -131,6 +131,24 @@ def run_all(swipl, hwfile):
         
         print("Hard #{0}:\t{1}%\t{2}\t{3}".format(i, score*100, points*100, total*100))
  
+ 
+def generate_reference(swipl, hwfile):
+    for i in range(NO_EASY_TESTS):
+        print("Generating EASY #" + str(i))
+        testfile = "easy/in_easy" + str(i) + ".txt"
+        reffile = "easy/out_easy" + str(i) + ".txt"
+        output = generate_output(swipl, hwfile, testfile, checkingScriptWithBonus, False)
+        with open(reffile, "w") as file:
+            file.write(output)
+        
+    for i in range(NO_HARD_TESTS):
+        print("Generating HARD #" + str(i))
+        testfile = "hard/in_hard" + str(i) + ".txt"
+        reffile = "hard/out_hard" + str(i) + ".txt"
+        output = generate_output(swipl, hwfile, testfile, checkingScriptWithBonus, False)
+        with open(reffile, "w") as file:
+            file.write(output)
+ 
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Prolog Homework Checker')
@@ -143,6 +161,8 @@ if __name__ == '__main__':
                     help='Path to test file. Example: easy/in_easy1.txt')
     parser.add_argument('--reffile',
                     help='Path to reference file. Example: easy/out_easy1.txt')
+    parser.add_argument('--generateref', action="store_true",
+                    help='Internal use only. Do not activate. WILL OVERWRITE REFERENCE FILES.')
     args = parser.parse_args()
     
     if (args.testfile and not args.reffile) or (args.reffile and not args.testfile):
@@ -153,6 +173,8 @@ if __name__ == '__main__':
         print("Your score on this test: {0}%".format(score*100))
         with open('output.txt', 'w') as f:
             f.write(output)
+    elif args.generateref:
+        generate_reference(args.swiplexe, args.hwfile)
     else:
         run_all(args.swiplexe, args.hwfile)
         
