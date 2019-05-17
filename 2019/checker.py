@@ -29,7 +29,7 @@ PERCENTAGE_ROOT = 0.10
 PERCENTAGE_EDGES = 0.90
 PERCENTAGE_BONUS = 0.25
 NO_EASY_TESTS = 1
-NO_HARD_TESTS = 0
+NO_HARD_TESTS = 60
 EASY_TESTS_SCORE = 0.25
 HARD_TESTS_SCORE = 0.65
 
@@ -103,11 +103,12 @@ def run_test(swipl, hwfile, testfile, reffile, suppress_errors = False):
  
 def run_all(swipl, hwfile):
     score_per_easy_test = EASY_TESTS_SCORE / NO_EASY_TESTS
-    #score_per_hard_test = HARD_TESTS_SCORE / NO_HARD_TESTS
+    score_per_hard_test = HARD_TESTS_SCORE / NO_HARD_TESTS
     
     print("Type #no\tresult%\tpoints\ttotal")
     
     total = 0
+    
     for i in range(NO_EASY_TESTS):
         testfile = "easy/in_easy" + str(i) + ".txt"
         reffile = "easy/out_easy" + str(i) + ".txt"
@@ -118,6 +119,17 @@ def run_all(swipl, hwfile):
         total += points
         
         print("Easy #{0}:\t{1}%\t{2}\t{3}".format(i, score*100, points*100, total*100))
+        
+    for i in range(NO_HARD_TESTS):
+        testfile = "hard/in_hard" + str(i) + ".txt"
+        reffile = "hard/out_hard" + str(i) + ".txt"
+        
+        output, score = run_test(swipl, hwfile, testfile, reffile, True)
+        
+        points = score * score_per_hard_test
+        total += points
+        
+        print("Hard #{0}:\t{1}%\t{2}\t{3}".format(i, score*100, points*100, total*100))
  
     
 if __name__ == '__main__':
