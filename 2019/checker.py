@@ -26,12 +26,12 @@ checkingScriptWithBonus = '\
 
 # grading
 PERCENTAGE_ROOT = 0.10
-PERCENTAGE_EDGES = 0.90
+PERCENTAGE_EDGES = 0.80
 PERCENTAGE_BONUS = 0.25
-NO_EASY_TESTS = 1
-NO_HARD_TESTS = 60
-EASY_TESTS_SCORE = 0.25
-HARD_TESTS_SCORE = 0.65
+NO_EASY_TESTS = 10
+NO_HARD_TESTS = 70
+EASY_TESTS_SCORE = 0.30
+HARD_TESTS_SCORE = 0.70
 
 
 def generate_output(swipl, tema, testin, goal, suppress_errors):
@@ -55,7 +55,7 @@ def generate_output(swipl, tema, testin, goal, suppress_errors):
     prolog = assertions + ',' + goal + '.';
         
     # run for 10 seconds max
-    #command = 'timeout 10 {0} -t halt -l "{1}" -g "{2}"'.format(swipl, tema, prolog)
+    #command = 'timeout 15 {0} -t halt -l "{1}" -g "{2}"'.format(swipl, tema, prolog)
     command = '{0} -t halt -l "{1}" -g "{2}"'.format(swipl, tema, prolog)
     
     try:
@@ -74,6 +74,9 @@ def generate_output(swipl, tema, testin, goal, suppress_errors):
 def run_test(swipl, hwfile, testfile, reffile, suppress_errors = False):
     output = generate_output(swipl, hwfile, testfile, checkingScript, suppress_errors)
     
+    if output == "false" or output == "error":
+        return output, 0
+        
     outparts = output.split(':')
     outroot = json.loads(outparts[0])
     outedges = json.loads(outparts[1])
@@ -93,6 +96,10 @@ def run_test(swipl, hwfile, testfile, reffile, suppress_errors = False):
             score += PERCENTAGE_EDGES
             
             output = generate_output(swipl, hwfile, testfile, checkingScriptWithBonus, suppress_errors)
+            
+            if output == "false" or output == "error":
+                return output, score
+            
             outparts = output.split(':')
             outpath = json.loads(outparts[2])
             if outpath == refpath:
@@ -118,7 +125,7 @@ def run_all(swipl, hwfile):
         points = score * score_per_easy_test
         total += points
         
-        print("Easy #{0}:\t{1}%\t{2}\t{3}".format(i, score*100, points*100, total*100))
+        print("Easy #{0}:\t{1:.0f}%\t{2:.2f}\t{3:.2f}".format(i, score*100, points*100, total*100))
         
     for i in range(NO_HARD_TESTS):
         testfile = "hard/in_hard" + str(i) + ".txt"
@@ -129,23 +136,26 @@ def run_all(swipl, hwfile):
         points = score * score_per_hard_test
         total += points
         
-        print("Hard #{0}:\t{1}%\t{2}\t{3}".format(i, score*100, points*100, total*100))
+        print("Hard #{0}:\t{1:.0f}%\t{2:.2f}\t{3:.2f}".format(i, score*100, points*100, total*100))
  
- 
+    print("Your total score: {0} out of 115".format(int(round((total+0.01)*100))))
+    print("Another 10 points may be awarded for the README and for code readability")
+
+
 def generate_reference(swipl, hwfile):
     for i in range(NO_EASY_TESTS):
         print("Generating EASY #" + str(i))
         testfile = "easy/in_easy" + str(i) + ".txt"
         reffile = "easy/out_easy" + str(i) + ".txt"
-        output = generate_output(swipl, hwfile, testfile, checkingScriptWithBonus, False)
+        output = generate_output(swipl, hwfile, testfile, checkingScriptWithBonus, True)
         with open(reffile, "w") as file:
             file.write(output)
         
-    for i in range(NO_HARD_TESTS):
+    for i in range(60, NO_HARD_TESTS):
         print("Generating HARD #" + str(i))
         testfile = "hard/in_hard" + str(i) + ".txt"
         reffile = "hard/out_hard" + str(i) + ".txt"
-        output = generate_output(swipl, hwfile, testfile, checkingScriptWithBonus, False)
+        output = generate_output(swipl, hwfile, testfile, checkingScriptWithBonus, True)
         with open(reffile, "w") as file:
             file.write(output)
  
