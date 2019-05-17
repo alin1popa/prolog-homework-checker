@@ -138,7 +138,7 @@ def run_all(swipl, hwfile):
         
         print("Hard #{0}:\t{1:.0f}%\t{2:.2f}\t{3:.2f}".format(i, score*100, points*100, total*100))
  
-    print("Your total score: {0} out of 115".format(int(round((total+0.01)*100))))
+    print("Your total score: {0} out of 115".format(int(round(total*100+0.01))))
     print("Another 10 points may be awarded for the README and for code readability")
 
 
@@ -165,7 +165,7 @@ if __name__ == '__main__':
     parser.add_argument('--swiplexe', default='swipl',
                     help='Absolute or relative path to swipl.exe; default \
                     "swipl" but you need to add its location to PATH')
-    parser.add_argument('--hwfile', required=True,
+    parser.add_argument('--hwfile', default="main.pl",
                     help='Path to prolog homework file. Example: main.pl')
     parser.add_argument('--testfile',
                     help='Path to test file. Example: easy/in_easy1.txt')
@@ -174,6 +174,8 @@ if __name__ == '__main__':
     parser.add_argument('--generateref', action="store_true",
                     help='Internal use only. Do not activate. WILL OVERWRITE REFERENCE FILES.')
     args = parser.parse_args()
+    
+    print args.swiplexe
     
     if (args.testfile and not args.reffile) or (args.reffile and not args.testfile):
         sys.exit('If you don\'t run all tests you must specify both --testfile and --reffile parameters')
