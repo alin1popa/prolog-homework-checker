@@ -74,38 +74,41 @@ def generate_output(swipl, tema, testin, goal, suppress_errors):
 def run_test(swipl, hwfile, testfile, reffile, suppress_errors = False):
     output = generate_output(swipl, hwfile, testfile, checkingScript, suppress_errors)
     
-    if output == "false" or output == "error":
-        return output, 0
+    try:
+        if output == "false" or output == "error":
+            return output, 0
+            
+        outparts = output.split(':')
+        outroot = json.loads(outparts[0])
+        outedges = json.loads(outparts[1])
         
-    outparts = output.split(':')
-    outroot = json.loads(outparts[0])
-    outedges = json.loads(outparts[1])
-    
-    with open(reffile, 'r') as file:
-        reffile = file.read().replace('\n', '')
-    
-    refparts = reffile.split(':')
-    refroot = json.loads(refparts[0])
-    refedges = json.loads(refparts[1])
-    refpath = json.loads(refparts[2])
-    
-    score = 0
-    if outroot == refroot:
-        score += PERCENTAGE_ROOT
-        if sorted(outedges) == sorted(refedges):
-            score += PERCENTAGE_EDGES
-            
-            output = generate_output(swipl, hwfile, testfile, checkingScriptWithBonus, suppress_errors)
-            
-            if output == "false" or output == "error":
-                return output, score
-            
-            outparts = output.split(':')
-            outpath = json.loads(outparts[2])
-            if outpath == refpath:
-                score += PERCENTAGE_BONUS
-    
-    return output, score
+        with open(reffile, 'r') as file:
+            reffile = file.read().replace('\n', '')
+        
+        refparts = reffile.split(':')
+        refroot = json.loads(refparts[0])
+        refedges = json.loads(refparts[1])
+        refpath = json.loads(refparts[2])
+        
+        score = 0
+        if outroot == refroot:
+            score += PERCENTAGE_ROOT
+            if sorted(outedges) == sorted(refedges):
+                score += PERCENTAGE_EDGES
+                
+                output = generate_output(swipl, hwfile, testfile, checkingScriptWithBonus, suppress_errors)
+                
+                if output == "false" or output == "error":
+                    return output, score
+                
+                outparts = output.split(':')
+                outpath = json.loads(outparts[2])
+                if outpath == refpath:
+                    score += PERCENTAGE_BONUS
+        
+        return output, score
+    except:
+        return output, 0
    
  
 def run_all(swipl, hwfile):
