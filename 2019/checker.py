@@ -64,16 +64,18 @@ def generate_output(swipl, tema, testin, goal, suppress_errors):
         else:
             with open(os.devnull, 'w') as devnull:
                 r = check_output(command, shell=True, stderr=devnull)
+        r = r.decode("utf-8")
     except subprocess.CalledProcessError as grepexc:
         # return code 1 means goal failed
         # return code 2 means raised exception
         r = "false" if grepexc.returncode is 1 else "error"
-    return r.decode("utf-8") if r else "false"
+    return r if r else "false"
 
     
 def run_test(swipl, hwfile, testfile, reffile, suppress_errors = False):
     output = generate_output(swipl, hwfile, testfile, checkingScript, suppress_errors)
     
+    score = 0
     try:
         if output == "false" or output == "error":
             return output, 0
@@ -90,7 +92,6 @@ def run_test(swipl, hwfile, testfile, reffile, suppress_errors = False):
         refedges = json.loads(refparts[1])
         refpath = json.loads(refparts[2])
         
-        score = 0
         if outroot == refroot:
             score += PERCENTAGE_ROOT
             if sorted(outedges) == sorted(refedges):
@@ -107,8 +108,9 @@ def run_test(swipl, hwfile, testfile, reffile, suppress_errors = False):
                     score += PERCENTAGE_BONUS
         
         return output, score
-    except:
-        return output, 0
+    except Exception as e:
+         #print(e)
+        return output, score
    
  
 def run_all(swipl, hwfile):
@@ -177,8 +179,6 @@ if __name__ == '__main__':
     parser.add_argument('--generateref', action="store_true",
                     help='Internal use only. Do not activate. WILL OVERWRITE REFERENCE FILES.')
     args = parser.parse_args()
-    
-    print args.swiplexe
     
     if (args.testfile and not args.reffile) or (args.reffile and not args.testfile):
         sys.exit('If you don\'t run all tests you must specify both --testfile and --reffile parameters')
